@@ -1,7 +1,5 @@
 --[[
 
-#Type 'Module'
-
 What Port Can do?
 	Any Script Can Request Function by port.
 
@@ -12,8 +10,10 @@ Commands:
 	changefunction(Port,NewFunction,Key) #Change Old Function to New Function.
 	request(Port,Key) #Fire Function (require Enabled Port)
 	fire(Port,key) #Fire Function (require Enabled Port)
-	Enabled(Port,Key) #Enabled Port.
-	Disabled(Port,Key) #Disabled Port.
+	enabled(Port,Key) #Enabled Port.
+	disabled(Port,Key) #Disabled Port.
+	delete(Port,Key) #Delete Port.
+	getinfo(Port,Key) #Look all information Port.
 	
 How to use:
 	1.Register Port
@@ -72,6 +72,11 @@ function PortModule:register(Port,PortName,thisfunction,CustomKey)
 		if rawequal(CustomKey,nil) then
 			CustomKey = CreateStrongKey(32)
 		end
+		if type(thisfunction) ~= "function" then
+			return {Code = -430,Stack = "Invaid 3 (Missing Function.)"}
+		elseif rawequal(PortName,nil) then
+			PortName = Port
+		end
 		PortList[Port] = {
 			Name = PortName,
 			execute = thisfunction,
@@ -81,6 +86,23 @@ function PortModule:register(Port,PortName,thisfunction,CustomKey)
 		return {Key = CustomKey};
 	end
 	return {Code = -440,Stack = "This Port Already Registed."};
+end
+
+function PortModule:getinfo(Port,Key)
+	if PortList[Port] and rawequal(PortList[Port].Key,Key) then
+		return PortList[Port]
+	else
+		return {Code = -647,Stack = "Invaild Key."}
+	end
+end
+
+function PortModule:delete(Port,Key)
+	if PortList[Port] and rawequal(PortList[Port].Key,Key) then
+		PortList[Port] = nil
+		return {Code = 795,Stack = Port.." Removed."}
+	else
+		return {Code = -647,Stack = Port.." Invaild key or not found."}
+	end
 end
 
 function PortModule:changefunction(Port,Newfunction,Key)
@@ -96,7 +118,11 @@ function PortModule:request(Port,Key)
 		PortList[Port].execute()
 		return {Code = 000,Stack = "Success."}; 
 	else
-		return {Code = -700,Stack = "Forgot Enabled port or key?"}
+		if rawequal(PortList[Port].Enabled,false) then
+			return {Code = -700,Stack = "Forgot Enabled Port."}
+		else
+			return {Code = -700,Stack = "Invaild Key."}
+		end
 	end
 end
 
@@ -105,7 +131,7 @@ function PortModule:fire(Port,Key)
 end
 
 
-function PortModule:Enabled(Port,Key)
+function PortModule:enabled(Port,Key)
 	if PortList[Port] and rawequal(PortList[Port].Key,Key) then
 		PortList[Port].Enabled = true
 		return {Code = -000,Stack = "Success."};
@@ -113,7 +139,7 @@ function PortModule:Enabled(Port,Key)
 	return {Code = -450,Stack = "Failure Connecting."};
 end
 
-function PortModule:Disabled(Port,Key)
+function PortModule:disabled(Port,Key)
 	if PortList[Port] and rawequal(PortList[Port].Key,Key) then
 		PortList[Port].Enabled = false
 		return {Code = 000,Stack = "Success."};
