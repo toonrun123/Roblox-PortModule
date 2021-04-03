@@ -7,12 +7,16 @@ Commands:
 	ports() #Look All Ports
 	find(Port) #Find port.
 	register(Port,PortName,Function,CustomKey) #Register Port.
+	listen(Port,PortName,Function,CustomKey) #Register Port.
+	listener(Port,PortName,thisfunction,CustomKey) #Register Port.
 	changefunction(Port,NewFunction,Key) #Change Old Function to New Function.
 	request(Port,Key) #Fire Function (require Enabled Port)
 	fire(Port,key) #Fire Function (require Enabled Port)
 	enabled(Port,Key) #Enabled Port.
 	disabled(Port,Key) #Disabled Port.
 	delete(Port,Key) #Delete Port.
+	remove(Port,Key) #Delete Port.
+	destroy(Port,Key) #Delete Port.
 	getinfo(Port,Key) #Look all information Port.
 	
 How to use:
@@ -70,12 +74,12 @@ end
 function PortModule:register(Port,PortName,thisfunction,CustomKey)
 	if rawequal(PortList[Port],nil) then
 		if rawequal(CustomKey,nil) then
-			CustomKey = CreateStrongKey(32)
+			CustomKey = CreateStrongKey(64)
 		end
 		if type(thisfunction) ~= "function" then
 			return {Code = -430,Stack = "Invaid 3 (Missing Function.)"}
 		elseif rawequal(PortName,nil) then
-			PortName = Port
+			PortName = "PORT_"..Port
 		end
 		PortList[Port] = {
 			Name = PortName,
@@ -83,9 +87,21 @@ function PortModule:register(Port,PortName,thisfunction,CustomKey)
 			Key = CustomKey,
 			Enabled = false,
 		}
-		return {Key = CustomKey};
+		return 
+			{
+				Name = PortName,
+				Key = CustomKey
+			};
 	end
 	return {Code = -440,Stack = "This Port Already Registed."};
+end
+
+function PortModule:listen(Port,PortName,thisfunction,CustomKey)
+	PortModule:register(Port,PortName,thisfunction,CustomKey)
+end
+
+function PortModule:listener(Port,PortName,thisfunction,CustomKey)
+	PortModule:register(Port,PortName,thisfunction,CustomKey)
 end
 
 function PortModule:getinfo(Port,Key)
@@ -103,6 +119,14 @@ function PortModule:delete(Port,Key)
 	else
 		return {Code = -647,Stack = Port.." Invaild key or not found."}
 	end
+end
+
+function PortModule:remove(Port,Key)
+	PortModule:delete(Port,Key)
+end
+
+function PortModule:destroy(Port,Key)
+	PortModule:delete(Port,Key)
 end
 
 function PortModule:changefunction(Port,Newfunction,Key)
