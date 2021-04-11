@@ -10,8 +10,8 @@ Commands:
 	listen(Port,PortName,Function,CustomKey) #Register Port.
 	listener(Port,PortName,thisfunction,CustomKey) #Register Port.
 	changefunction(Port,NewFunction,Key) #Change Old Function to New Function.
-	request(Port,Key) #Fire Function (require Enabled Port)
-	fire(Port,key) #Fire Function (require Enabled Port)
+	request(Port,Key,...(Args)) #Fire Function (require Enabled Port)
+	fire(Port,key,...(Args)) #Fire Function (require Enabled Port)
 	enabled(Port,Key) #Enabled Port.
 	disabled(Port,Key) #Disabled Port.
 	delete(Port,Key) #Delete Port.
@@ -137,9 +137,10 @@ function PortModule:changefunction(Port,Newfunction,Key)
 	return {Code = -470,Stack = "Fail Change Function."};
 end
 
-function PortModule:request(Port,Key)
+function PortModule:request(Port,Key,...)
 	if PortList[Port] and rawequal(PortList[Port].Key,Key) and rawequal(PortList[Port].Enabled,true) then
-		PortList[Port].execute()
+		local values = { ... }
+		PortList[Port].execute(table.unpack(values))
 		return {Code = 000,Stack = "Success."}; 
 	else
 		if rawequal(PortList[Port].Enabled,false) then
@@ -150,8 +151,8 @@ function PortModule:request(Port,Key)
 	end
 end
 
-function PortModule:fire(Port,Key)
-	PortModule:request(Port,Key)
+function PortModule:fire(Port,Key,...)
+	PortModule:request(Port,Key,...)
 end
 
 
